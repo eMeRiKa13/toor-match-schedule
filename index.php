@@ -41,7 +41,7 @@ if(!empty($_POST) && $_POST['import_matches'] == 1) {
 <!doctype html>
 <html>
 <head>
-    <title>Planning de Matchs - Toornament</title>
+    <title>Matches Scheduling Tool for Toornament.com</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="pure-min.css">
     <style type="text/css">
@@ -166,9 +166,9 @@ if(!empty($_POST) && $_POST['import_matches'] == 1) {
             <table class="pure-table pure-table-horizontal">
                 <thead>
                     <tr>
-                        <th style="text-align: left; width: 350px;">Infos</th>
-                        <th>Date</th>
-                        <th>Heure</th>
+                        <th style="text-align: left; width: 350px;">Info</th>
+                        <th style="text-align: left;">Date</th>
+                        <th style="text-align: left;">Hour (24 clock format)</th>
                         <th style="text-align: left; width: 115px;"></th>
                     </tr>
                 </thead>
