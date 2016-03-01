@@ -38,5 +38,5 @@ function getAccessToken($api_client_id, $api_client_secret, $api_key) {
         $access_token = $token_data['access_token'];
     }
 
-    return $access_token;
+    return @$access_token;
 }
