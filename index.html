@@ -73,15 +73,15 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            apiKeyInput             = $("input[name='api_key']");
-            clientIdInput           = $("input[name='api_client_id']");
-            clientSecretInput       = $("input[name='api_client_secret']");
-            accessToken             = null;
-            views                   = $('.view');
-            tournamentListContainer = $('#tournament-list-container');
-            tournamentList          = $('tbody', tournamentListContainer);
-            matchListContainer      = $('#match-list-container');
-            matchList               = $('tbody', matchListContainer);
+            var apiKeyInput             = $("input[name='api_key']"),
+                clientIdInput           = $("input[name='api_client_id']"),
+                clientSecretInput       = $("input[name='api_client_secret']"),
+                accessToken             = null,
+                views                   = $('.view'),
+                tournamentListContainer = $('#tournament-list-container'),
+                tournamentList          = $('tbody', tournamentListContainer),
+                matchListContainer      = $('#match-list-container'),
+                matchList               = $('tbody', matchListContainer);
 
             apiKeyInput.val(getParameterByName('api_key'));
             clientIdInput.val(getParameterByName('client_id'));
@@ -100,11 +100,12 @@
 
             matchList.on('click', 'button[data-role="save-match"]', function(e) {
                 e.preventDefault();
-                matchId         = $(this).data('matchId');
-                tournamentId    = $(this).data('tournamentId');
+                matchId         = $(this).data('match');
+                tournamentId    = $(this).data('tournament');
+                console.log(matchId,tournamentId);
                 matchDate       = $('input[name="date"]', $(this)).val();
                 matchTimezone   = $('#timezone').val();
-                saveMatch(tournamentId, matchId, matchDate, matchTimezone, apiKeyInput.val(), accessToken, onMatchSaveSuccess, onMatchSaveFailure);
+                saveMatch(tournamentId, matchId, '2016-01-01T14:10:00+0000', 'Europe/Paris', apiKeyInput.val(), accessToken, onMatchSaveSuccess, onMatchSaveFailure);
             });
 
 
@@ -152,7 +153,7 @@
                             '<td><input type="text" name="date" value="' + date + '" placeholder="JJ/MM/AAAA" /></td>' +
                             '<td><input type="text" name="time" value="' + time + '" placeholder="HH:MM" /></td>' +
                             '<td>' +
-                                '<button data-role="save-match" data-matchId="' + id + '" data-tournamentId="' + tournament_id + '" class="pure-button pure-button-primary">Save</button>' +
+                                '<button data-role="save-match" data-match="' + id + '" data-tournament="' + tournament_id + '" class="pure-button pure-button-primary">Save</button>' +
                             '</td>' +
                         '</tr>'
                     );
@@ -189,10 +190,10 @@
             $.ajax({
                 type : 'GET',
                 url : 'https://api.toornament.com/v1/me/tournaments',
+                contentType : 'application/json',
                 beforeSend: function(xhr){
                     xhr.setRequestHeader('X-Api-Key', apiKey);
                     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
                 },
                 success : successHandler,
                 error: errorHandler
@@ -203,10 +204,10 @@
             $.ajax({
                 type : 'GET',
                 url : 'https://api.toornament.com/v1/tournaments/' + tournamentId + '/matches',
+                contentType : 'application/json',
                 beforeSend: function(xhr){
                     xhr.setRequestHeader('X-Api-Key', apiKey);
                     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
                 },
                 success : successHandler,
                 error: errorHandler
@@ -214,29 +215,31 @@
         }
 
         function saveMatch(tournamentId, matchId, matchDate, matchTimezone, apiKey, accessToken, successHandler, errorHandler) {
-            $.ajax({
-                type : 'GET',
-                url : 'save.php',
-                data: {
-                    tournamentId:   tournamentId,
-                    matchId:        matchId,
-                    matchDate:      matchDate,
-                    matchTimezone:  matchTimezone,
-                    apiKey:         apiKey,
-                    accessToken:    accessToken
-                },
-                success : successHandler,
-                error: errorHandler
-            });
+            var r = new XMLHttpRequest();
+            r.open('PATCH', 'https://api.toornament.com/v1/tournaments/' + tournamentId + '/matches/' + matchId, true);
+            r.setRequestHeader('Content-Type', 'application/json');
+            r.setRequestHeader('X-Api-Key', apiKey);
+            r.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+            r.onreadystatechange = function () {
+                if (r.readyState == 4 && r.status == 200) {
+                    successHandler(r.responseText)
+                } else {
+                    errorHandler(r.responseText)
+                }
+            };
+            r.send(JSON.stringify({
+                date:      matchDate,
+                timezone:  matchTimezone
+            }));
         }
 
         function getAccessToken(apiKey, clientId, clientSecret, successHandler, errorHandler) {
             $.ajax({
                 type : 'GET',
                 url : 'https://api.toornament.com/oauth/v2/token?grant_type=client_credentials&client_id=' + clientId + '&client_secret=' + clientSecret,
+                contentType : 'application/json',
                 beforeSend: function(xhr){
                     xhr.setRequestHeader('X-Api-Key', apiKey);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
                 },
                 success : successHandler,
                 error : errorHandler
