@@ -134,6 +134,7 @@
                 views.hide();
 
                 for(i=0; i<data.length; i++) {
+                    match_id = data[i].id;
                     tournament_id = data[i].tournament_id;
                     stage_number = data[i].stage_number;
                     group_number = data[i].group_number;
@@ -153,7 +154,7 @@
                             '<td><input type="text" name="date" value="' + date + '" placeholder="JJ/MM/AAAA" /></td>' +
                             '<td><input type="text" name="time" value="' + time + '" placeholder="HH:MM" /></td>' +
                             '<td>' +
-                                '<button data-role="save-match" data-match="' + id + '" data-tournament="' + tournament_id + '" class="pure-button pure-button-primary">Save</button>' +
+                                '<button data-role="save-match" data-match="' + match_id + '" data-tournament="' + tournament_id + '" class="pure-button pure-button-primary">Save</button>' +
                             '</td>' +
                         '</tr>'
                     );
