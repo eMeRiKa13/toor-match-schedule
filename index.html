@@ -139,7 +139,7 @@
                     group_number = data[i].group_number;
                     round_number = data[i].round_number;
                     opponent1_name = data[i].opponents[0].participant !== null? data[i].opponents[0].participant.name: '';
-                    opponent1_name = data[i].opponents[1].participant !== null? data[i].opponents[1].participant.name: '';
+                    opponent2_name = data[i].opponents[1].participant !== null? data[i].opponents[1].participant.name: '';
                     date = data[i].date !== null? data[i].date : '';
                     time = data[i].date !== null? data[i].date : '';
 
@@ -148,7 +148,7 @@
                             '<td style="text-align: left;">' +
                                 '<span style="font-size: 12px;">Stage ' + stage_number + ' / Group ' + group_number + ' / Round ' + round_number + '</span>' +
                                 '<br />' +
-                                '<strong>' + opponent1_name + '</strong>' + ' vs ' + '<strong>' + opponent1_name + '</strong>' +
+                                '<strong>' + opponent1_name + '</strong>' + ' vs ' + '<strong>' + opponent2_name + '</strong>' +
                             '</td>' +
                             '<td><input type="text" name="date" value="' + date + '" placeholder="JJ/MM/AAAA" /></td>' +
                             '<td><input type="text" name="time" value="' + time + '" placeholder="HH:MM" /></td>' +
