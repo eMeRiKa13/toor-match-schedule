@@ -29,15 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
             isPublic = data[i].public?'public':'private';
 
             row =   '<tr>' +
-            '<td>'+name+'</td>' +
-            '<td>'+discipline+'</td>' +
-            '<td>'+size+'</td>' +
-            '<td>'+isOnline+'</td>' +
-            '<td>'+isPublic+'</td>' +
-            '<td>' +
-            '<button data-id="'+id+'" class="button-import-matches pure-button pure-button-primary">Edit</button>' +
-            '</td>' +
-            '</tr>'
+                        '<td>'+name+'</td>' +
+                        '<td>'+discipline+'</td>' +
+                        '<td>'+size+'</td>' +
+                        '<td>'+isOnline+'</td>' +
+                        '<td>'+isPublic+'</td>' +
+                        '<td>' +
+                            '<button data-id="'+id+'" class="button-import-matches pure-button pure-button-primary">Edit</button>' +
+                        '</td>' +
+                    '</tr>'
             ;
             tournamentList.innerHTML += row;
         }
@@ -72,19 +72,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 time = interpretedDate.format('LT');
             }
 
-
             row =   '<tr>' +
-            '<td style="text-align: left;">' +
-            '<span style="font-size: 12px;">Stage ' + stage_number + ' / Group ' + group_number + ' / Round ' + round_number + '</span>' +
-            '<br />' +
-            '<strong>' + opponent1_name + '</strong>' + ' vs ' + '<strong>' + opponent2_name + '</strong>' +
-            '</td>' +
-            '<td><input type="text" class="date" value="' + date + '" placeholder="JJ/MM/AAAA" /></td>' +
-            '<td><input type="text" class="time" value="' + time + '" placeholder="HH:MM" /></td>' +
-            '<td>' +
-            '<button data-match="' + match_id + '" data-tournament="' + tournament_id + '" class="button-save-match pure-button pure-button-primary">Save</button>' +
-            '</td>' +
-            '</tr>'
+                        '<td>' +
+                            '<div class="grid-flex vertical">' +
+                                '<span style="font-size: 12px;">Stage ' + stage_number + ' / Group ' + group_number + ' / Round ' + round_number + '</span>' +
+                                '<br />' +
+                                '<strong>' + opponent1_name + '</strong><br/>' + ' vs ' + '<br/><strong>' + opponent2_name + '</strong>' +
+                            '</div>' +
+                        '</td>' +
+                        '<td><div class="form-row"><div class="form-field"><input type="text" class="date" value="' + date + '" placeholder="JJ/MM/AAAA" /></div></div></td>' +
+                        '<td><div class="form-row"><div class="form-field"><input type="text" class="time" value="' + time + '" placeholder="HH:MM" /></div></div></td>' +
+                        '<td>' +
+                            '<button data-match="' + match_id + '" data-tournament="' + tournament_id + '" class="button-save-match pure-button pure-button-primary">Save</button>' +
+                        '</td>' +
+                    '</tr>'
             ;
             matchList.innerHTML += row;
         }
