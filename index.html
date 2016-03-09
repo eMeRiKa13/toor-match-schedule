@@ -69,9 +69,12 @@
         </div>
     </div>
 
+    <script src="moment.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
+
+            moment.locale('fr');
 
             var apiKeyInput             = $("input[name='api_key']"),
                 clientIdInput           = $("input[name='api_client_id']"),
@@ -100,14 +103,19 @@
 
             matchList.on('click', 'button[data-role="save-match"]', function(e) {
                 e.preventDefault();
-                matchId         = $(this).data('match');
-                tournamentId    = $(this).data('tournament');
-                console.log(matchId,tournamentId);
-                matchDate       = $('input[name="date"]', $(this)).val();
-                matchTimezone   = $('#timezone').val();
-                saveMatch(tournamentId, matchId, '2016-01-01T14:10:00+0000', 'Europe/Paris', apiKeyInput.val(), accessToken, onMatchSaveSuccess, onMatchSaveFailure);
+                date = e.target.parentNode.parentNode.getElementsByClassName("date")[0].value;
+                time = e.target.parentNode.parentNode.getElementsByClassName("time")[0].value;
+                saveMatch(
+                        e.target.dataset.tournament,
+                        e.target.dataset.match,
+                        moment(date+' '+time, 'L LT').format('YYYY-MM-DDTHH:mm:ssZZ'),
+                        document.getElementById('timezone').value,
+                        apiKeyInput.val(),
+                        accessToken,
+                        onMatchSaveSuccess,
+                        onMatchSaveFailure
+                );
             });
-
 
             onTournamentImportSuccess = function(data) {
                 views.hide();
@@ -141,8 +149,15 @@
                     round_number = data[i].round_number;
                     opponent1_name = data[i].opponents[0].participant !== null? data[i].opponents[0].participant.name: '';
                     opponent2_name = data[i].opponents[1].participant !== null? data[i].opponents[1].participant.name: '';
-                    date = data[i].date !== null? data[i].date : '';
-                    time = data[i].date !== null? data[i].date : '';
+
+                    date = '';
+                    time = '';
+                    interpretedDate = moment(data[i].date, 'YYYY-MM-DDTHH:mm:ssZZ');
+                    if (interpretedDate.isValid()){
+                        date = interpretedDate.format('L');
+                        time = interpretedDate.format('LT');
+                    }
+
 
                     row = $(
                         '<tr>' +
@@ -151,8 +166,8 @@
                                 '<br />' +
                                 '<strong>' + opponent1_name + '</strong>' + ' vs ' + '<strong>' + opponent2_name + '</strong>' +
                             '</td>' +
-                            '<td><input type="text" name="date" value="' + date + '" placeholder="JJ/MM/AAAA" /></td>' +
-                            '<td><input type="text" name="time" value="' + time + '" placeholder="HH:MM" /></td>' +
+                            '<td><input type="text" class="date" value="' + date + '" placeholder="JJ/MM/AAAA" /></td>' +
+                            '<td><input type="text" class="time" value="' + time + '" placeholder="HH:MM" /></td>' +
                             '<td>' +
                                 '<button data-role="save-match" data-match="' + match_id + '" data-tournament="' + tournament_id + '" class="pure-button pure-button-primary">Save</button>' +
                             '</td>' +
@@ -166,18 +181,18 @@
             onMatchSaveSuccess = function (data) {
                 console.log('save matches success', data);
             };
-            onTournamentImportFailure = function (data) {
-                if (401 === data.status) {
+            onTournamentImportFailure = function (status, data) {
+                if (401 === status) {
                     getAccessToken(apiKeyInput.val(), clientIdInput.val(), clientSecretInput.val(), onGetAccessSuccess, null);
                 }
             };
-            onMatchImportFailure = function (data) {
-                if (401 === data.status) {
+            onMatchImportFailure = function (status, data) {
+                if (401 === status) {
                     getAccessToken(apiKeyInput.val(), clientIdInput.val(), clientSecretInput.val(), onGetAccessSuccess, null);
                 }
             };
-            onMatchSaveFailure = function (data) {
-                if (401 === data.status) {
+            onMatchSaveFailure = function (status, data) {
+                if (401 === status) {
                     getAccessToken(apiKeyInput.val(), clientIdInput.val(), clientSecretInput.val(), onGetAccessSuccess, null);
                 }
             };
@@ -188,31 +203,41 @@
         });
 
         function importTournamentList(apiKey, accessToken, successHandler, errorHandler) {
-            $.ajax({
-                type : 'GET',
-                url : 'https://api.toornament.com/v1/me/tournaments',
-                contentType : 'application/json',
-                beforeSend: function(xhr){
-                    xhr.setRequestHeader('X-Api-Key', apiKey);
-                    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-                },
-                success : successHandler,
-                error: errorHandler
-            });
+            var r = new XMLHttpRequest();
+            r.open('GET', 'https://api.toornament.com/v1/me/tournaments', true);
+            r.setRequestHeader('Content-Type', 'application/json');
+            r.setRequestHeader('X-Api-Key', apiKey);
+            r.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+            r.onreadystatechange = function () {
+                if (r.readyState !== 4) {
+                    return;
+                }
+                if (successHandler !== null && r.status == 200) {
+                    successHandler(JSON.parse(r.responseText))
+                } else if (errorHandler !== null) {
+                    errorHandler(r.status, r.responseText)
+                }
+            };
+            r.send();
         }
 
         function importMatchList(tournamentId, apiKey, accessToken, successHandler, errorHandler) {
-            $.ajax({
-                type : 'GET',
-                url : 'https://api.toornament.com/v1/tournaments/' + tournamentId + '/matches',
-                contentType : 'application/json',
-                beforeSend: function(xhr){
-                    xhr.setRequestHeader('X-Api-Key', apiKey);
-                    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-                },
-                success : successHandler,
-                error: errorHandler
-            });
+            var r = new XMLHttpRequest();
+            r.open('GET', 'https://api.toornament.com/v1/tournaments/' + tournamentId + '/matches', true);
+            r.setRequestHeader('Content-Type', 'application/json');
+            r.setRequestHeader('X-Api-Key', apiKey);
+            r.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+            r.onreadystatechange = function () {
+                if (r.readyState !== 4) {
+                    return;
+                }
+                if (successHandler !== null && r.status == 200) {
+                    successHandler(JSON.parse(r.responseText))
+                } else if (errorHandler !== null) {
+                    errorHandler(r.status, r.responseText)
+                }
+            };
+            r.send();
         }
 
         function saveMatch(tournamentId, matchId, matchDate, matchTimezone, apiKey, accessToken, successHandler, errorHandler) {
@@ -222,10 +247,13 @@
             r.setRequestHeader('X-Api-Key', apiKey);
             r.setRequestHeader('Authorization', 'Bearer ' + accessToken);
             r.onreadystatechange = function () {
-                if (r.readyState == 4 && r.status == 200) {
-                    successHandler(r.responseText)
-                } else {
-                    errorHandler(r.responseText)
+                if (r.readyState !== 4) {
+                    return;
+                }
+                if (successHandler !== null && r.status == 200) {
+                    successHandler(JSON.parse(r.responseText))
+                } else if (errorHandler !== null) {
+                    errorHandler(r.status, r.responseText)
                 }
             };
             r.send(JSON.stringify({
@@ -235,20 +263,25 @@
         }
 
         function getAccessToken(apiKey, clientId, clientSecret, successHandler, errorHandler) {
-            $.ajax({
-                type : 'GET',
-                url : 'https://api.toornament.com/oauth/v2/token?grant_type=client_credentials&client_id=' + clientId + '&client_secret=' + clientSecret,
-                contentType : 'application/json',
-                beforeSend: function(xhr){
-                    xhr.setRequestHeader('X-Api-Key', apiKey);
-                },
-                success : successHandler,
-                error : errorHandler
-            });
+            var r = new XMLHttpRequest();
+            r.open('GET', 'https://api.toornament.com/oauth/v2/token?grant_type=client_credentials&client_id=' + clientId + '&client_secret=' + clientSecret, true);
+            r.setRequestHeader('Content-Type', 'application/json');
+            r.setRequestHeader('X-Api-Key', apiKey);
+            r.onreadystatechange = function () {
+                if (r.readyState !== 4) {
+                    return;
+                }
+                if (successHandler !== null && r.status == 200) {
+                    successHandler(JSON.parse(r.responseText))
+                } else if (errorHandler !== null) {
+                    errorHandler(r.status, r.responseText)
+                }
+            };
+            r.send();
         }
 
-        function getParameterByName(name, url) {
-            if (!url) url = window.location.href;
+        function getParameterByName(name) {
+            var url = window.location.href;
             name = name.replace(/[\[\]]/g, "\\$&");
             var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
                     results = regex.exec(url);
