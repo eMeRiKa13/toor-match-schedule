@@ -23,9 +23,17 @@ document.addEventListener('DOMContentLoaded', function() {
         for(i=0; i<data.length; i++) {
             id = data[i].id;
             name = data[i].name;
+            discipline = data[i].discipline;
+            size = data[i].size;
+            isOnline = data[i].online?'online':'draft';
+            isPublic = data[i].public?'public':'private';
 
             row =   '<tr>' +
             '<td>'+name+'</td>' +
+            '<td>'+discipline+'</td>' +
+            '<td>'+size+'</td>' +
+            '<td>'+isOnline+'</td>' +
+            '<td>'+isPublic+'</td>' +
             '<td>' +
             '<button data-id="'+id+'" class="button-import-matches pure-button pure-button-primary">Edit</button>' +
             '</td>' +
