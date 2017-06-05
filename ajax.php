@@ -14,7 +14,7 @@ if(!empty($_GET)) {
 
     // Get cURL resource
     $curl = curl_init();
-    $data = '{"date": "'.$date->format(DATE_ISO8601).'", "timezone": "'.$_GET['timezone'].'"}';
+    $data = '{"date": "'.$date->format(DATE_ISO8601).'"}';
     echo $data;
 
     curl_setopt_array(

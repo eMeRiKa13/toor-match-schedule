@@ -14,6 +14,26 @@ if(!empty($_POST) && $_POST['import_matches'] == 1) {
 
     curl_setopt_array(
         $curl, array(
+        CURLOPT_URL             => 'https://api.toornament.com/v1/tournaments/'.trim($_POST['toor_id']),
+        CURLOPT_RETURNTRANSFER  => true,
+        CURLOPT_VERBOSE         => true,
+        CURLOPT_HEADER          => true,
+        CURLOPT_SSL_VERIFYPEER  => false,
+        CURLOPT_HTTPHEADER      => array(
+            'X-Api-Key: '.trim($_POST['api_key']),
+            'Authorization: Bearer '.$access_token,
+            'Content-Type: application/json'
+        )
+    ));
+    $output         = curl_exec($curl);
+    $header_size    = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header         = substr($output, 0, $header_size);
+    $body           = substr($output, $header_size);
+
+    $tournament = json_decode($body);
+
+    curl_setopt_array(
+        $curl, array(
         CURLOPT_URL             => 'https://api.toornament.com/v1/tournaments/'.trim($_POST['toor_id']).'/matches',
         CURLOPT_RETURNTRANSFER  => true,
         CURLOPT_VERBOSE         => true,
@@ -179,7 +199,7 @@ if(!empty($_POST) && $_POST['import_matches'] == 1) {
                     <?php
                     if($match->date != null) {
                         $date = new DateTime($match->date);
-                        $date->setTimezone(new DateTimeZone($match->timezone));
+                        $date->setTimezone(new DateTimeZone($tournament->timezone));
                     } else {
                         $date = null;
                     } ?>
@@ -237,7 +257,7 @@ if(!empty($_POST) && $_POST['import_matches'] == 1) {
                 <input type="text" name="toor_id" value="<?php if(isset($_POST['toor_id'])) echo $_POST['toor_id']; ?>" autocomplete="off" />
                 <br />
                 <span style="color: dimgrey; font-size: 14px;">
-                    Copy your tournament ID, example https://www.toornament.com/admin/tournaments/568f94f4140ba061098b46b5/ id is 568f94f4140ba061098b46b5
+                    Copy your tournament ID, example https://organizer.toornament.com/tournaments/441680454962233344/matches/ id is 441680454962233344
                 </span>
             </p>
 
