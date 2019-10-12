@@ -20,7 +20,7 @@ if(!empty($_GET)) {
     // Get cURL resource
     $curl = curl_init();
 
-    curl_setopt($curl, CURLINFO_HEADER_OUT, true); // enable tracking
+    //curl_setopt($curl, CURLINFO_HEADER_OUT, true); // enable tracking
     
     $data = '{"scheduled_datetime": "'.$date->format(DATE_ISO8601).'"}';
     echo $data;
@@ -53,13 +53,13 @@ if(!empty($_GET)) {
 
 
   
-$headerSent = curl_getinfo($curl, CURLINFO_HEADER_OUT ); // request headers
-echo $headerSent;
-echo $output;
+//$headerSent = curl_getinfo($curl, CURLINFO_HEADER_OUT ); // request headers
+//echo $headerSent;
+//echo $output;
     // Close request to clear up some resources
     curl_close($curl);
 
-    //return json_decode($body);
+    return json_decode($body);
 }
 ?>
 
