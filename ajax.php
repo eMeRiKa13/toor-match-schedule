@@ -3,9 +3,14 @@ if(!empty($_GET)) {
 
     // Get Access Token
     include_once('oauth.php');
-    $access_token = getAccessToken(trim($_GET['api_client_id']), trim($_GET['api_client_secret']), trim($_GET['api_key']));
 
-    $dataDate = explode('/', $_GET['date']);
+    // set scope for access token to organizer:result per the API v2.0 authorization Scopes spec
+    $scope = "organizer:result";
+
+    $access_token = getAccessTokenScope(trim($_GET['api_client_id']), trim($_GET['api_client_secret']), trim($_GET['api_key']), $scope);
+
+
+     $dataDate = explode('/', $_GET['date']);
     $dataTime = explode(':', $_GET['hour']);
 
     $date = new DateTime('now', new DateTimeZone($_GET['timezone']));
@@ -14,12 +19,15 @@ if(!empty($_GET)) {
 
     // Get cURL resource
     $curl = curl_init();
-    $data = '{"date": "'.$date->format(DATE_ISO8601).'"}';
+
+    curl_setopt($curl, CURLINFO_HEADER_OUT, true); // enable tracking
+    
+    $data = '{"scheduled_datetime": "'.$date->format(DATE_ISO8601).'"}';
     echo $data;
 
     curl_setopt_array(
         $curl, array(
-        CURLOPT_URL             => 'https://api.toornament.com/v1/tournaments/'.trim($_GET['toor_id']).'/matches/'.trim($_GET['match_id']),
+        CURLOPT_URL             => 'https://api.toornament.com/organizer/v2/tournaments/'.trim($_GET['toor_id']).'/matches/'.trim($_GET['match_id']),
         CURLOPT_RETURNTRANSFER  => true,
         CURLOPT_VERBOSE         => true,
         CURLOPT_HEADER          => true,
@@ -27,7 +35,9 @@ if(!empty($_GET)) {
         CURLOPT_HTTPHEADER      => array(
             'X-Api-Key: '.trim($_GET['api_key']),
             'Authorization: Bearer '.$access_token,
+            'organizer:result',
             'Content-Type: application/json'
+
         ),
         CURLOPT_CUSTOMREQUEST   => 'PATCH',
         CURLOPT_POSTFIELDS      => $data
@@ -39,10 +49,17 @@ if(!empty($_GET)) {
     $header         = substr($output, 0, $header_size);
     $body           = substr($output, $header_size);
 
+
+
+
+  
+$headerSent = curl_getinfo($curl, CURLINFO_HEADER_OUT ); // request headers
+echo $headerSent;
+echo $output;
     // Close request to clear up some resources
     curl_close($curl);
 
-    return json_decode($body);
+    //return json_decode($body);
 }
 ?>
 
